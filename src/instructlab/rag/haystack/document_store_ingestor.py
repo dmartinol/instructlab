@@ -49,6 +49,10 @@ class HaystackDocumentStoreIngestor(DocumentStoreIngestor):
                 "document_writer"
             ).document_store
             logger.info(f"count_documents: {document_store.count_documents()}")
+
+            # Final step required for InMemory document store
+            document_store.save_to_disk(self.document_store_config.uri)
+            logger.info(f"Saved document store as: {self.document_store_config.uri}")
             return True, document_store.count_documents()
         except Exception as e:
             logger.error(f"Ingestion attempt failed: {e}")

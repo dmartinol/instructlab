@@ -6,11 +6,9 @@ from haystack.components.embedders import (  # type: ignore
     SentenceTransformersDocumentEmbedder,
     SentenceTransformersTextEmbedder,
 )
+from haystack.components.retrievers import InMemoryEmbeddingRetriever  # type: ignore
 from haystack.components.writers import DocumentWriter  # type: ignore
-from milvus_haystack import MilvusDocumentStore  # type: ignore
-from milvus_haystack.milvus_embedding_retriever import (  # type: ignore
-    MilvusEmbeddingRetriever,
-)
+from haystack.document_stores.in_memory import InMemoryDocumentStore  # type: ignore
 
 # First Party
 from instructlab.rag.haystack.components.document_splitter import (
@@ -34,19 +32,18 @@ def create_document_writer(
 
 
 def create_document_store(document_store_config: DocumentStoreConfig, drop_old: bool):
-    return MilvusDocumentStore(
-        connection_args={"uri": document_store_config.uri},
-        collection_name=document_store_config.collection_name,
-        drop_old=drop_old,
-    )
+    if not drop_old:
+        # Retrieve use case: load file first
+        return InMemoryDocumentStore.load_from_disk(document_store_config.uri)
+    return InMemoryDocumentStore()
 
 
 def create_retriever(
     document_store_config: DocumentStoreConfig,
     retriever_config: RetrieverConfig,
-    document_store: MilvusDocumentStore,
+    document_store: InMemoryDocumentStore,
 ):
-    return MilvusEmbeddingRetriever(
+    return InMemoryEmbeddingRetriever(
         document_store=document_store,
         top_k=retriever_config.top_k,
     )

@@ -6,7 +6,7 @@ import tempfile
 
 # Third Party
 from haystack import Document, component  # type: ignore
-from pymilvus import MilvusClient  # type: ignore
+from haystack.document_stores.in_memory import InMemoryDocumentStore  # type: ignore
 import pytest
 
 # First Party
@@ -73,7 +73,7 @@ def fixture_mock_create_text_embedder():
         yield mock_function
 
 
-def test_document_store_ingest_and_retrieve_for_milvus(
+def test_document_store_ingest_and_retrieve_for_in_memory_store(
     mock_create_splitter, mock_create_document_embedder, mock_create_text_embedder
 ):
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -105,16 +105,11 @@ def test_document_store_ingest_and_retrieve_for_milvus(
         assert count > 0
 
         # Validate document store collection
-        client = MilvusClient(document_store_config.uri)
-        collections = client.list_collections()
-        assert len(collections) == 1
-        assert collections[0] == document_store_config.collection_name
-        stats = client.get_collection_stats(document_store_config.collection_name)
-        assert stats is not None
-        assert isinstance(stats, dict)
-        assert "row_count" in stats
-        assert stats["row_count"] == count
-        client.close()
+        document_store = InMemoryDocumentStore.load_from_disk(document_store_config.uri)
+        documents = document_store.filter_documents()
+        assert len(documents) == 1
+        documents_count = document_store.count_documents()
+        assert documents_count == 1
 
         # Run a retriever session
         # Copy db file to avoid concurrent access issues

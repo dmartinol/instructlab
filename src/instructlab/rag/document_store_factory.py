@@ -18,10 +18,10 @@ def create_document_retriever(
 ) -> DocumentStoreRetriever:
     # First Party
     from instructlab.rag.haystack.document_store_factory import (
-        create_milvus_document_retriever,
+        create_in_memory_document_retriever,
     )
 
-    return create_milvus_document_retriever(
+    return create_in_memory_document_retriever(
         document_store_config=document_store_config,
         retriever_config=retriever_config,
     )
@@ -33,10 +33,10 @@ def create_document_store_ingestor(
 ) -> DocumentStoreIngestor:
     # First Party
     from instructlab.rag.haystack.document_store_factory import (
-        create_milvus_document_store,
+        create_in_memory_document_store,
     )
 
-    return create_milvus_document_store(
+    return create_in_memory_document_store(
         document_store_config=document_store_config,
         embedding_config=embedding_config,
     )

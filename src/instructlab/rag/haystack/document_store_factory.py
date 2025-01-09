@@ -23,7 +23,7 @@ from instructlab.rag.rag_configuration import (
 logger = logging.getLogger(__name__)
 
 
-def create_milvus_document_store(
+def create_in_memory_document_store(
     document_store_config: DocumentStoreConfig, embedding_config: EmbeddingModelConfig
 ) -> DocumentStoreIngestor:
     return HaystackDocumentStoreIngestor(
@@ -31,7 +31,7 @@ def create_milvus_document_store(
     )
 
 
-def create_milvus_document_retriever(
+def create_in_memory_document_retriever(
     document_store_config: DocumentStoreConfig, retriever_config: RetrieverConfig
 ) -> DocumentStoreRetriever:
     return HaystackDocumentStoreRetriever(
