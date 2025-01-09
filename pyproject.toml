@@ -40,6 +40,7 @@ issues = "https://github.com/instructlab/instructlab/issues"
 "config" = "instructlab.config.config:config"
 "data" = "instructlab.cli.data.data:data"
 "model" = "instructlab.model.model:model"
+"rag" = "instructlab.cli.rag.rag:rag"
 "system" = "instructlab.cli.system.system:system"
 "taxonomy" = "instructlab.taxonomy.taxonomy:taxonomy"
 
@@ -53,7 +54,7 @@ issues = "https://github.com/instructlab/instructlab/issues"
 "list" = "instructlab.cli.data.list:list_datasets"
 
 [project.entry-points."instructlab.command.model"]
-"chat" = "instructlab.model.chat:chat"
+"chatx" = "instructlab.model.chat:chat"
 "convert" = "instructlab.model.convert:convert"
 "download" = "instructlab.model.download:download"
 "evaluate" = "instructlab.model.evaluate:evaluate"
@@ -62,6 +63,9 @@ issues = "https://github.com/instructlab/instructlab/issues"
 "train" = "instructlab.cli.model.train:train"
 "list" = "instructlab.cli.model.list:model_list"
 "upload" = "instructlab.cli.model.upload:upload"
+
+[project.entry-points."instructlab.command.rag"]
+"convert" = "instructlab.cli.rag.convert:convert"
 
 [project.entry-points."instructlab.command.system"]
 "info" = "instructlab.cli.system.info:info"
@@ -99,7 +103,9 @@ include = [
   "instructlab.generator",
   "instructlab.cli",
   "instructlab.cli.model",
+  "instructlab.cli.rag",
   "instructlab.model",
+  "instructlab.rag",
   "instructlab.train",
   "instructlab.train.lora_mlx",
   "instructlab.train.lora_mlx.models",
