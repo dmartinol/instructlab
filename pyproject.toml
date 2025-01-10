@@ -59,7 +59,7 @@ issues = "https://github.com/instructlab/instructlab/issues"
 "list" = "instructlab.cli.data.list:list_datasets"
 
 [project.entry-points."instructlab.command.model"]
-"chat" = "instructlab.model.chat:chat"
+"chatx" = "instructlab.model.chat:chat"
 "convert" = "instructlab.model.convert:convert"
 "download" = "instructlab.model.download:download"
 "evaluate" = "instructlab.cli.model.evaluate:evaluate"
@@ -71,6 +71,7 @@ issues = "https://github.com/instructlab/instructlab/issues"
 
 [project.entry-points."instructlab.command.rag"]
 "convert" = "instructlab.cli.rag.convert:convert"
+"ingest" = "instructlab.cli.rag.ingest:ingest"
 
 [project.entry-points."instructlab.command.system"]
 "info" = "instructlab.cli.system.info:info"
@@ -114,6 +115,7 @@ include = [
   "instructlab.mlx_explore",
   "instructlab.model",
   "instructlab.process",
+  "instructlab.cli.rag",
   "instructlab.rag",
   "instructlab.train",
   "instructlab.train.lora_mlx",
