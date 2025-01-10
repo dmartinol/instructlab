@@ -16,7 +16,6 @@ from instructlab.rag.haystack.component_factory import (
     create_document_writer,
     create_splitter,
 )
-from instructlab.rag.rag_configuration import DocumentStoreConfig, EmbeddingModelConfig
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +23,16 @@ logger = logging.getLogger(__name__)
 class HaystackDocumentStoreIngestor(DocumentStoreIngestor):
     def __init__(
         self,
-        document_store_config: DocumentStoreConfig,
-        embedding_config: EmbeddingModelConfig,
+        document_store_uri: str,
+        document_store_collection_name: str,
+        embedding_model_path: str,
     ):
         super().__init__()
-        self.document_store_config = document_store_config
-        self.embedding_config = embedding_config
+        self.document_store_uri = document_store_uri
         self._pipeline = _create_pipeline(
-            document_store_config=document_store_config,
-            embedding_config=embedding_config,
+            document_store_uri=document_store_uri,
+            document_store_collection_name=document_store_collection_name,
+            embedding_model_path=embedding_model_path,
         )
         _connect_components(self._pipeline)
 
@@ -51,8 +51,8 @@ class HaystackDocumentStoreIngestor(DocumentStoreIngestor):
             logger.info(f"count_documents: {document_store.count_documents()}")
 
             # Final step required for InMemory document store
-            document_store.save_to_disk(self.document_store_config.uri)
-            logger.info(f"Saved document store as: {self.document_store_config.uri}")
+            document_store.save_to_disk(self.document_store_uri)
+            logger.info(f"Saved document store as: {self.document_store_uri}")
             return True, document_store.count_documents()
         except Exception as e:
             logger.error(f"Ingestion attempt failed: {e}")
@@ -60,23 +60,28 @@ class HaystackDocumentStoreIngestor(DocumentStoreIngestor):
 
 
 def _create_pipeline(
-    document_store_config: DocumentStoreConfig, embedding_config: EmbeddingModelConfig
+    document_store_uri: str,
+    document_store_collection_name: str,
+    embedding_model_path: str,
 ) -> Pipeline:
     pipeline = Pipeline()
     pipeline.add_component(instance=create_converter(), name="converter")
     pipeline.add_component(instance=DocumentCleaner(), name="document_cleaner")
     # TODO make the params configurable
     pipeline.add_component(
-        instance=create_splitter(embedding_config=embedding_config),
+        instance=create_splitter(embedding_model_path=embedding_model_path),
         name="document_splitter",
     )
     # TODO make this more generic
     pipeline.add_component(
-        instance=create_document_embedder(embedding_config=embedding_config),
+        instance=create_document_embedder(embedding_model_path=embedding_model_path),
         name="document_embedder",
     )
     pipeline.add_component(
-        instance=create_document_writer(document_store_config=document_store_config),
+        instance=create_document_writer(
+            document_store_uri=document_store_uri,
+            document_store_collection_name=document_store_collection_name,
+        ),
         name="document_writer",
     )
     return pipeline

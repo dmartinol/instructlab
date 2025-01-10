@@ -15,11 +15,6 @@ from instructlab.rag.document_store_factory import (
     create_document_retriever,
     create_document_store_ingestor,
 )
-from instructlab.rag.rag_configuration import (
-    DocumentStoreConfig,
-    EmbeddingModelConfig,
-    RetrieverConfig,
-)
 
 
 @component
@@ -51,7 +46,7 @@ def fixture_mock_create_splitter():
     with patch(
         "instructlab.rag.haystack.component_factory.create_splitter"
     ) as mock_function:
-        mock_function.side_effect = lambda embedding_config: DocumentSplitterMock()
+        mock_function.side_effect = lambda embedding_model_path: DocumentSplitterMock()
         yield mock_function
 
 
@@ -60,7 +55,7 @@ def fixture_mock_create_document_embedder():
     with patch(
         "instructlab.rag.haystack.component_factory.create_document_embedder"
     ) as mock_function:
-        mock_function.side_effect = lambda embedding_config: DocumentEmbedderMock()
+        mock_function.side_effect = lambda embedding_model_path: DocumentEmbedderMock()
         yield mock_function
 
 
@@ -69,7 +64,7 @@ def fixture_mock_create_text_embedder():
     with patch(
         "instructlab.rag.haystack.component_factory.create_text_embedder"
     ) as mock_function:
-        mock_function.side_effect = lambda embedding_config: TextEmbedderMock()
+        mock_function.side_effect = lambda embedding_model_path: TextEmbedderMock()
         yield mock_function
 
 
@@ -78,14 +73,13 @@ def test_document_store_ingest_and_retrieve_for_in_memory_store(
 ):
     with tempfile.TemporaryDirectory() as temp_dir:
         # Ingest docs from a test folder
-        document_store_config = DocumentStoreConfig(
-            uri=os.path.join(temp_dir, "ingest.db"),
-            collection_name="default",
-        )
-        embedding_config = EmbeddingModelConfig()
+        document_store_uri = os.path.join(temp_dir, "ingest.db")
+        document_store_collection_name = "default"
+        embedding_model_path = "foo"
         ingestor: DocumentStoreIngestor = create_document_store_ingestor(
-            document_store_config=document_store_config,
-            embedding_config=embedding_config,
+            document_store_uri=document_store_uri,
+            document_store_collection_name=document_store_collection_name,
+            embedding_model_path=embedding_model_path,
         )
         mock_create_splitter.assert_called_once()
         mock_create_document_embedder.assert_called_once()
@@ -105,7 +99,7 @@ def test_document_store_ingest_and_retrieve_for_in_memory_store(
         assert count > 0
 
         # Validate document store collection
-        document_store = InMemoryDocumentStore.load_from_disk(document_store_config.uri)
+        document_store = InMemoryDocumentStore.load_from_disk(document_store_uri)
         documents = document_store.filter_documents()
         assert len(documents) == 1
         documents_count = document_store.count_documents()
@@ -114,15 +108,13 @@ def test_document_store_ingest_and_retrieve_for_in_memory_store(
         # Run a retriever session
         # Copy db file to avoid concurrent access issues
         new_file = os.path.join(temp_dir, "query.db")
-        shutil.copy(document_store_config.uri, new_file)
-        document_store_config = DocumentStoreConfig(
-            uri=new_file,
-            collection_name="default",
-        )
-        retriever_config = RetrieverConfig(embedding_config=embedding_config)
+        shutil.copy(document_store_uri, new_file)
+        document_store_uri = new_file
         retriever: DocumentStoreRetriever = create_document_retriever(
-            document_store_config=document_store_config,
-            retriever_config=retriever_config,
+            document_store_uri=document_store_uri,
+            document_store_collection_name=document_store_collection_name,
+            top_k=20,
+            embedding_model_path=embedding_model_path,
         )
         mock_create_text_embedder.assert_called_once()
         assert retriever is not None

@@ -13,7 +13,6 @@ from instructlab.rag.haystack.component_factory import (
     create_retriever,
     create_text_embedder,
 )
-from instructlab.rag.rag_configuration import DocumentStoreConfig, RetrieverConfig
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +20,17 @@ logger = logging.getLogger(__name__)
 class HaystackDocumentStoreRetriever(DocumentStoreRetriever):
     def __init__(
         self,
-        document_store_config: DocumentStoreConfig,
-        retriever_config: RetrieverConfig,
+        document_store_uri: str,
+        document_store_collection_name: str,
+        top_k: int,
+        embedding_model_path: str,
     ):
         super().__init__()
-        self.document_store_config = document_store_config
-        self.retriever_config = retriever_config
         self._pipeline = _create_pipeline(
-            document_store_config=document_store_config,
-            retriever_config=retriever_config,
+            document_store_uri=document_store_uri,
+            document_store_collection_name=document_store_collection_name,
+            top_k=top_k,
+            embedding_model_path=embedding_model_path,
         )
         _connect_components(self._pipeline)
 
@@ -49,17 +50,21 @@ class HaystackDocumentStoreRetriever(DocumentStoreRetriever):
 
 
 def _create_pipeline(
-    document_store_config: DocumentStoreConfig, retriever_config: RetrieverConfig
+    document_store_uri: str,
+    document_store_collection_name: str,
+    top_k: int,
+    embedding_model_path: str,
 ) -> Pipeline:
-    document_store = create_document_store(document_store_config, drop_old=False)
+    document_store = create_document_store(
+        document_store_uri=document_store_uri,
+        document_store_collection_name=document_store_collection_name,
+        drop_old=False,
+    )
     document_retriever = create_retriever(
-        document_store_config=document_store_config,
-        retriever_config=retriever_config,
+        top_k=top_k,
         document_store=document_store,
     )
-    text_embedder = create_text_embedder(
-        embedding_config=retriever_config.embedding_model
-    )
+    text_embedder = create_text_embedder(embedding_model_path=embedding_model_path)
     pipeline = Pipeline()
     pipeline.add_component("embedder", text_embedder)
     pipeline.add_component("retriever", document_retriever)

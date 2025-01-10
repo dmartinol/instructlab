@@ -14,26 +14,31 @@ from instructlab.rag.haystack.document_store_ingestor import (
 from instructlab.rag.haystack.document_store_retriever import (
     HaystackDocumentStoreRetriever,
 )
-from instructlab.rag.rag_configuration import (
-    DocumentStoreConfig,
-    EmbeddingModelConfig,
-    RetrieverConfig,
-)
 
 logger = logging.getLogger(__name__)
 
 
 def create_in_memory_document_store(
-    document_store_config: DocumentStoreConfig, embedding_config: EmbeddingModelConfig
+    document_store_uri: str,
+    document_store_collection_name: str,
+    embedding_model_path: str,
 ) -> DocumentStoreIngestor:
     return HaystackDocumentStoreIngestor(
-        document_store_config=document_store_config, embedding_config=embedding_config
+        document_store_uri=document_store_uri,
+        document_store_collection_name=document_store_collection_name,
+        embedding_model_path=embedding_model_path,
     )
 
 
 def create_in_memory_document_retriever(
-    document_store_config: DocumentStoreConfig, retriever_config: RetrieverConfig
+    document_store_uri: str,
+    document_store_collection_name: str,
+    top_k: int,
+    embedding_model_path: str,
 ) -> DocumentStoreRetriever:
     return HaystackDocumentStoreRetriever(
-        document_store_config=document_store_config, retriever_config=retriever_config
+        document_store_uri=document_store_uri,
+        document_store_collection_name=document_store_collection_name,
+        top_k=top_k,
+        embedding_model_path=embedding_model_path,
     )
