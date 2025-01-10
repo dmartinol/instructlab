@@ -2,6 +2,7 @@
 
 # Standard
 import logging
+import os
 
 # Third Party
 import click
@@ -17,36 +18,29 @@ from instructlab.rag.process_docs import (
 logger = logging.getLogger(__name__)
 
 
-@click.command(name="convert")
+@click.command()
 @click.option(
     "--input",
     "input_dir",
     required=False,
     default=None,
-    envvar="ILAB_PROCESS_INPUT",
-    help="The folder with user documents to convert. In case it's missing, the knowledge taxonomy files will be converted instead.",
+    help="The folder with user documents to process. In case it's missing, the knowledge taxonomy files will be processed instead.",
     type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True),
 )
 @click.option(
     "--taxonomy-path",
     type=click.Path(),
-    envvar="ILAB_TAXONOMY_PATH",
     help="Directory where taxonomy is stored and accessed from.",
 )
 @click.option(
     "--taxonomy-base",
-    envvar="ILAB_TAXONOMY_BASE",
     help="Branch of taxonomy used to calculate diff against.",
 )
 @click.option(
     "--output",
     "output_dir",
-    type=click.Path(
-        exists=True,
-        dir_okay=True,
-        file_okay=False,
-    ),
-    envvar="ILAB_OUTPUT_DIR",
+    type=click.Path(),
+    required=True,
     help="Directory where processed docs are stored.",
 )
 @click.pass_context
@@ -59,6 +53,11 @@ def convert(
     output_dir,
 ):
     """The document processing pipeline"""
+
+    output_dir = "path/to/your/directory"
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     if input_dir is None:
         if taxonomy_path is None:

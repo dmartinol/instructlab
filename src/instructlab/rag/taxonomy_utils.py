@@ -4,7 +4,7 @@ from typing import Optional
 import logging
 
 # Third Party
-from instructlab.rag.taxonomy import read_taxonomy_leaf_nodes
+from instructlab.sdg.utils.taxonomy import read_taxonomy_leaf_nodes
 
 logger = logging.getLogger(__name__)
 
