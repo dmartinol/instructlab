@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--taxonomy-path",
     required=False,
-    type=click.Path(),
+    type=click.Path(file_okay=False, readable=True),
     help="Directory where taxonomy is stored and accessed from."
 )
 @click.option(
