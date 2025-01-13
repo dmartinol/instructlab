@@ -29,6 +29,11 @@ chat:
   # Renders vertical overflow if enabled, displays ellipses otherwise.
   # Default: True
   visible_overflow: true
+# RAG convert configuration section.
+convert:
+  # Directory where converted documents are stored.
+  # Default: /data/instructlab/converted_documents
+  output_dir: /data/instructlab/converted_documents
 # Evaluate configuration section.
 evaluate:
   # Base taxonomy branch

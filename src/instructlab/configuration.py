@@ -268,6 +268,13 @@ class _serve(BaseModel):
         return get_api_base(self.server.host, self.server.port)
 
 
+class _convert(BaseModel):
+    """Class describing configuration of the 'ilab rag convert' sub-command."""
+    output_dir: StrictStr = Field(
+        default_factory=lambda: DEFAULTS.CONVERTED_DOCUMENTS_DIR,
+        description="Directory where converted documents are stored.",
+    )
+
 class _generate(BaseModel):
     """Class describing configuration of the 'generate' sub-command."""
 
@@ -608,6 +615,10 @@ class Config(BaseModel):
     # generate configuration
     generate: _generate = Field(
         default_factory=_generate, description="Generate configuration section."
+    )
+    # RAG configuration
+    convert: _convert = Field(
+        default_factory=_convert, description="RAG convert configuration section."
     )
     # serve configuration (includes both llama-cpp and vLLM configuration)
     serve: _serve = Field(

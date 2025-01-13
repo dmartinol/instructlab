@@ -20,28 +20,28 @@ logger = logging.getLogger(__name__)
 
 @click.command()
 @click.option(
-    "--input",
-    "input_dir",
+    "--input_dir",
     required=False,
-    default=None,
-    help="The folder with user documents to process. In case it's missing, the knowledge taxonomy files will be processed instead.",
     type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True),
+    default=None,
+    help="The folder with user documents to process. In case it's missing, the knowledge taxonomy files will be processed instead."
 )
 @click.option(
     "--taxonomy-path",
+    required=False,
     type=click.Path(),
-    help="Directory where taxonomy is stored and accessed from.",
+    help="Directory where taxonomy is stored and accessed from."
 )
 @click.option(
     "--taxonomy-base",
-    help="Branch of taxonomy used to calculate diff against.",
+    required=False,
+    help="Branch of taxonomy used to calculate diff against."
 )
 @click.option(
-    "--output",
-    "output_dir",
-    type=click.Path(),
-    required=True,
-    help="Directory where processed docs are stored.",
+    "--output-dir",
+    type=click.Path(file_okay=False, writable=True),
+    required=False,
+    cls=clickext.ConfigOption,
 )
 @click.pass_context
 @clickext.display_params
