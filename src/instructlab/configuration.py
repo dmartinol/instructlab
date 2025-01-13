@@ -584,6 +584,9 @@ class _document_store(BaseModel):
 class _embedding_model(BaseModel):
     """Class describing configuration of embedding parameters for RAG."""
 
+    # model configuration
+    model_config = ConfigDict(extra="ignore", protected_namespaces=())
+
     model_dir: str = Field(
         default=DEFAULTS.MODELS_DIR,
         description="The default system model location store, located in the data directory.",
