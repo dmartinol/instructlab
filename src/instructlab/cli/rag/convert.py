@@ -10,9 +10,9 @@ import click
 # First Party
 from instructlab import clickext
 from instructlab.configuration import DEFAULTS
-from instructlab.rag.process_docs import (
-    process_docs_from_folder,
-    process_docs_from_taxonomy,
+from instructlab.rag.convert import (
+    convert_documents_from_folder,
+    convert_documents_from_taxonomy,
 )
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 @click.command()
 @click.option(
-    "--input_dir",
+    "--input-dir",
     required=False,
     type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True),
     default=None,
@@ -72,14 +72,14 @@ def convert(
         logger.info(
             f"Pre-processing latest taxonomy changes at {taxonomy_path}@{taxonomy_base}"
         )
-        process_docs_from_taxonomy(
+        convert_documents_from_taxonomy(
             taxonomy_path=taxonomy_path,
             taxonomy_base=taxonomy_base,
             output_dir=output_dir,
         )
     else:
         logger.info(f"Pre-processing documents from {input_dir} to {output_dir}")
-        process_docs_from_folder(
+        convert_documents_from_folder(
             input_dir=input_dir,
             output_dir=output_dir,
         )

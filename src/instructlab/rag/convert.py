@@ -19,6 +19,8 @@ from docling.document_converter import DocumentConverter  # type: ignore
 from docling.document_converter import PdfFormatOption  # type: ignore
 from docling.models.easyocr_model import EasyOcrModel  # type: ignore
 from docling.models.tesseract_ocr_model import TesseractOcrModel  # type: ignore
+from xdg_base_dirs import xdg_data_dirs, xdg_data_home
+import yaml
 
 # First Party
 from instructlab.rag.taxonomy_utils import lookup_knowledge_files
@@ -27,7 +29,7 @@ from instructlab.utils import clear_directory
 logger = logging.getLogger(__name__)
 
 
-def process_docs_from_taxonomy(taxonomy_path, taxonomy_base, output_dir):
+def convert_documents_from_taxonomy(taxonomy_path, taxonomy_base, output_dir):
     # Taxonomy navigation strategy:
     # Create temp folder that is deleted when the function returns
     # Read taxonomy using read_taxonomy_leaf_nodes from instructlab-sdg package
@@ -40,40 +42,12 @@ def process_docs_from_taxonomy(taxonomy_path, taxonomy_base, output_dir):
         logger.info(f"Found {len(knowledge_files)} knowledge files")
         logger.info(f"{knowledge_files}")
 
-        process_docs_from_folder(temp_dir, output_dir)
+        convert_documents_from_folder(temp_dir, output_dir)
 
 
-# Copied from sdg.utils.chunkers because that code is being refactored so we want to avoid importing anything from it.
-# TODO: Once the code base has settled down, we should make sure this code exists only in one place.
-def resolve_ocr_options() -> OcrOptions:
-    # First, attempt to use tesserocr
-    try:
-        ocr_options = TesseractOcrOptions()
-
-        _ = TesseractOcrModel(True, ocr_options)
-        return ocr_options
-    except ImportError:
-        # No tesserocr, so try something else
-        pass
-    try:
-        ocr_options = EasyOcrOptions()
-        # Keep easyocr models on the CPU instead of GPU
-        ocr_options.use_gpu = False
-        # triggers torch loading, import lazily
-
-        _ = EasyOcrModel(True, ocr_options)
-        return ocr_options
-    except ImportError:
-        # no easyocr either, so don't use any OCR
-        logger.error(
-            "Failed to load Tesseract and EasyOCR - disabling optical character recognition in PDF documents"
-        )
-        return None
-
-
-def process_docs_from_folder(input_dir, output_dir, docling_model_path=None):
+def convert_documents_from_folder(input_dir, output_dir):
     """
-    Process user documents from a given `input_dir` folder to the given `output_dir` folder, using docling converters.
+    Convert user documents from a given `input_dir` folder to the given `output_dir` folder, using docling converters.
     Latest version of docling schema is used (currently, v2).
     """
     logger.info(f"Processing {input_dir} to {output_dir}")
@@ -83,20 +57,7 @@ def process_docs_from_folder(input_dir, output_dir, docling_model_path=None):
     source_files = _load_source_files(input_dir=input_dir)
     logger.info(f"Transforming source files {[p.name for p in source_files]}")
 
-    pipeline_options = PdfPipelineOptions(
-        artifacts_path=docling_model_path,
-        do_ocr=False,
-    )
-    ocr_options = resolve_ocr_options()
-    if ocr_options is not None:
-        pipeline_options.do_ocr = True
-        pipeline_options.ocr_options = ocr_options
-
-    doc_converter = DocumentConverter(
-        format_options={
-            InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
-        }
-    )
+    doc_converter = _initialize_docling()
     start_time = time.time()
     conv_results = doc_converter.convert_all(
         source_files,
@@ -120,6 +81,7 @@ def _load_source_files(input_dir) -> list[Path]:
     ]
 
 
+# From the Docling batch conversion example: https://ds4sd.github.io/docling/examples/batch_convert/
 def _export_documents(
     conv_results: Iterable[ConversionResult],
     output_dir: Path,
@@ -154,3 +116,80 @@ def _export_documents(
         f"and {partial_success_count} were partially converted."
     )
     return success_count, partial_success_count, failure_count
+
+
+# Adapted from part of sdg/generate_data.py:_sdg_init and sdg/utils/chunkers.py:DocumentChunker
+# because that code is being refactored so we want to avoid importing anything from it.
+# TODO: Once the code base has settled down, we should make sure this code exists only in one place.
+# TODO: Also, it is very messy to be pulling the docling_model_path from
+#  {xdg_data_home()}/instructlab/sdg/config.yaml.  This seems like a non-standard way to configure
+#  InstructLab functionality.  As part of unifying the code base, we should reconsider how this
+#  is configured.
+def _initialize_docling():
+    # Search for the pipeline in User and Site data directories
+    # then for a package defined pipeline
+    # and finally pipelines referenced by absolute path
+    data_dirs = [os.path.join(xdg_data_home(), "instructlab", "sdg")]
+    data_dirs.extend(os.path.join(dir, "instructlab", "sdg") for dir in xdg_data_dirs())
+
+    docling_model_path = None
+    sdg_models_path = docling_model_path
+    for d in data_dirs:
+        if os.path.exists(os.path.join(d, "models")):
+            sdg_models_path = os.path.join(d, "models")
+            break
+
+    if sdg_models_path is not None:
+        try:
+            with open(
+                os.path.join(sdg_models_path, "config.yaml"), "r", encoding="utf-8"
+            ) as file:
+                config = yaml.safe_load(file)
+                docling_model_path = config["models"][0]["path"]
+        except (FileNotFoundError, NotADirectoryError, PermissionError) as e:
+            logger.warning(f"unable to read docling models path from config.yaml {e}")
+
+    pipeline_options = PdfPipelineOptions(
+        artifacts_path=docling_model_path,
+        do_ocr=False,
+    )
+    ocr_options = _resolve_ocr_options()
+    if ocr_options is not None:
+        pipeline_options.do_ocr = True
+        pipeline_options.ocr_options = ocr_options
+
+    doc_converter = DocumentConverter(
+        format_options={
+            InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+        }
+    )
+
+    return doc_converter
+
+
+# Adapted from sdg.utils.chunkers because that code is being refactored so we want to avoid importing anything from it.
+# TODO: Once the code base has settled down, we should make sure this code exists only in one place.
+def _resolve_ocr_options() -> OcrOptions:
+    # First, attempt to use tesserocr
+    try:
+        ocr_options = TesseractOcrOptions()
+
+        _ = TesseractOcrModel(True, ocr_options)
+        return ocr_options
+    except ImportError:
+        # No tesserocr, so try something else
+        pass
+    try:
+        ocr_options = EasyOcrOptions()
+        # Keep easyocr models on the CPU instead of GPU
+        ocr_options.use_gpu = False
+        # triggers torch loading, import lazily
+
+        _ = EasyOcrModel(True, ocr_options)
+        return ocr_options
+    except ImportError:
+        # no easyocr either, so don't use any OCR
+        logger.error(
+            "Failed to load Tesseract and EasyOCR - disabling optical character recognition in PDF documents"
+        )
+        return None
