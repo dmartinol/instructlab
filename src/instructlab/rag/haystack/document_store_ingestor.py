@@ -21,6 +21,22 @@ logger = logging.getLogger(__name__)
 
 
 class HaystackDocumentStoreIngestor(DocumentStoreIngestor):
+    """
+    An implementation of the `DocumentStoreIngestor` interface using the Haystack framework.
+    The concrete class instance is defined using an Haystack `Pipeline` to implement the `ingest_documents` method.
+
+    The pipeline is defined by the following chain of components:
+    * A document converter, receiving the user document to generate the Haystack `Document`.
+    * A document cleaner, to remove unneeded text like extra whitespaces and empty lines.
+    * A document splitter to generate smaller chunks of the original documents.
+    * A document embedder to calculates document embeddings using the configured embedding model.
+    * A document store, where the document embeddings are ingested.
+    * A document writer to load vector embeddings to the document store.
+
+    The output of the `ingest_documents` method is tuple with the completion status and the number
+    of documents written to the document store.
+    """
+
     def __init__(
         self,
         document_store_uri: str,
@@ -36,7 +52,7 @@ class HaystackDocumentStoreIngestor(DocumentStoreIngestor):
         )
         _connect_components(self._pipeline)
 
-    def ingest_documents(self, input_dir) -> tuple[bool, int]:
+    def ingest_documents(self, input_dir: str) -> tuple[bool, int]:
         pattern = "*.json"
         if Path(os.path.join(input_dir, "docling-artifacts")).exists():
             pattern = "docling-artifacts/" + pattern

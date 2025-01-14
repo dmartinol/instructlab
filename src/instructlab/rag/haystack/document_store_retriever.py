@@ -18,6 +18,18 @@ logger = logging.getLogger(__name__)
 
 
 class HaystackDocumentStoreRetriever(DocumentStoreRetriever):
+    """
+    An implementation of the `DocumentStoreRetriever` interface using the Haystack framework.
+    The concrete class instance is defined using an Haystack `Pipeline` to implement the `augmented_context` method.
+
+    The pipeline is defined by the following chain of components:
+    * A text embedder, receiving the user query as the input parameter.
+    * A document store, where the document embeddings have been ingested.
+    * A document retriever receiving the embedded query and returning the matching documents from the document store.
+
+    The output of the `augmented_context` method is the concatenation of the matching documents.
+    """
+
     def __init__(
         self,
         document_store_uri: str,

@@ -13,6 +13,19 @@ def create_document_retriever(
     top_k: int,
     embedding_model_path: str,
 ) -> DocumentStoreRetriever:
+    """
+    Creates a `DocumentStoreRetriever` instance using the provided settings.
+
+    Args:
+        document_store_uri: URI of the document store service (or file if it's an embedded instance).
+        document_store_collection_name: Name of the document store collection from which the embeddings are retrieved.
+        top_k: Number of documents to retrieve at each request.
+        embedding_model_path: Path of the embedding model used to generate the query embeddings.
+
+    Returns:
+        An instance of `DocumentStoreRetriever` according to the provided settings.
+    """
+
     # First Party
     from instructlab.rag.haystack.document_store_factory import (
         create_in_memory_document_retriever,
@@ -31,6 +44,19 @@ def create_document_store_ingestor(
     document_store_collection_name: str,
     embedding_model_path: str,
 ) -> DocumentStoreIngestor:
+    """
+    Creates a `DocumentStoreIngestor` instance using the provided settings.
+
+    Args:
+        document_store_uri: URI of the document store service (or file if it's an embedded instance).
+        document_store_collection_name: Name of the document store collection from which the embeddings are retrieved.
+        top_k: Number of documents to retrieve at each request.
+        embedding_model_path: Path of the embedding model used to generate the query embeddings.
+
+    Returns:
+        An instance of `DocumentStoreIngestor` according to the provided settings.
+    """
+
     # First Party
     from instructlab.rag.haystack.document_store_factory import (
         create_in_memory_document_store,

@@ -23,6 +23,10 @@ def create_in_memory_document_store(
     document_store_collection_name: str,
     embedding_model_path: str,
 ) -> DocumentStoreIngestor:
+    """
+    Creates a `DocumentStoreIngestor` based on Haystack components.
+    """
+
     return HaystackDocumentStoreIngestor(
         document_store_uri=document_store_uri,
         document_store_collection_name=document_store_collection_name,
@@ -36,6 +40,10 @@ def create_in_memory_document_retriever(
     top_k: int,
     embedding_model_path: str,
 ) -> DocumentStoreRetriever:
+    """
+    Creates a `DocumentStoreRetriever` based on Haystack components.
+    """
+    
     return HaystackDocumentStoreRetriever(
         document_store_uri=document_store_uri,
         document_store_collection_name=document_store_collection_name,
