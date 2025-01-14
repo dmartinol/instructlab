@@ -61,7 +61,7 @@ def test_ingestor(
             "ingest",
             "--document-store-uri",
             document_store_config_uri,
-            "--input",
+            "--input-dir",
             input_dir,
         ],
     )

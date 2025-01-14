@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
     config_sections="embedding_model",
 )
 @click.option(
-    "--input",
+    "--input-dir",
     "input_dir",
     required=False,
     type=click.Path(
