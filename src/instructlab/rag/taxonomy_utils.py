@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Some basic utility methods for pulling documents out of an InstructLab taxonomy.
+
 # Standard
 from pathlib import Path
 from typing import Optional
@@ -33,6 +37,10 @@ def lookup_knowledge_files(taxonomy_path, taxonomy_base, temp_dir) -> list[Path]
 
 
 def lookup_processed_documents_folder(output_dir: str) -> Optional[Path]:
+    """
+    Takes an SDG output directory as input and returns the path to the latest processed documents folder
+    if it exists.  For use in integrating with SDG by pulling in SDG outputs.
+    """
     latest_folder = (
         max(Path(output_dir).iterdir(), key=lambda d: d.stat().st_mtime)
         if Path(output_dir).exists()

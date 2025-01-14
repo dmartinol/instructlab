@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
+# Code to instantiate the ilab rag convert command.
+# Calls out to code in ../../rag/convert.py to
+# provide the implementation.
+
 # Standard
 import logging
 import os
@@ -45,7 +49,7 @@ def convert(
     input_dir,
     output_dir,
 ):
-    """The document processing pipeline"""
+    """Pipeline to convert documents from their original format (e.g., PDF) into Docling JSON format for use by ilab rag ingest"""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 

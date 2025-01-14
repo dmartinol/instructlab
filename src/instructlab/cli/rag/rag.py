@@ -1,4 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
+
+# This code instantiates the CLI ilab rag group.
+
 # Standard
 
 # Third Party

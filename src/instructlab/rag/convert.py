@@ -1,3 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# This is the implementation code for the ilab rag convert command, which converts documents from their
+# native format (e.g., PDF) to Docling JSON for use by ilab rag ingest.  See also the code in clu/rag/convert.py
+# which instantiates the CLI command and calls out to the methods in this file.
+
 # Standard
 from pathlib import Path
 from typing import Iterable
@@ -30,12 +36,13 @@ logger = logging.getLogger(__name__)
 
 
 def convert_documents_from_taxonomy(taxonomy_path, taxonomy_base, output_dir):
-    # Taxonomy navigation strategy:
-    # Create temp folder that is deleted when the function returns
-    # Read taxonomy using read_taxonomy_leaf_nodes from instructlab-sdg package
-    # The above step also downloads the reference documents.
-    # Move all the downloaded documents under the temp folder
-    # Pass the list to process_docs_from_folder
+    """
+    Converts documents from a taxonomy. It uses the tempfile module to create a temporary directory that is
+    deleted when the function returns. It then uses the lookup_knowledge_files function from the instructlab-sdg
+    package to read the taxonomy and download the reference documents. The downloaded documents are moved to the
+    temporary directory. Finally, the convert_documents_from_folder function is called to process the documents
+    in the temporary directory and save them to the output directory.
+    """
     with tempfile.TemporaryDirectory() as temp_dir:
         logger.info(f"Temporary directory created: {temp_dir}")
         knowledge_files = lookup_knowledge_files(taxonomy_path, taxonomy_base, temp_dir)
@@ -74,6 +81,9 @@ def convert_documents_from_folder(input_dir, output_dir):
 
 
 def _load_source_files(input_dir) -> list[Path]:
+    """
+    Takes an input directory as an argument and returns a list of paths to all the files in that directory.
+    """
     return [
         Path(os.path.join(input_dir, f))
         for f in os.listdir(input_dir)
@@ -86,6 +96,21 @@ def _export_documents(
     conv_results: Iterable[ConversionResult],
     output_dir: Path,
 ):
+    """
+    Exports documents based on the conversion results.
+    The function first creates the output directory if it does not exist. It then initializes three
+    counters to keep track of the number of successful, partially successful, and failed conversions.
+    Next, it iterates over each conversion. If the conversion status is ConversionStatus.SUCCESS, it
+    increments the success_count and writes the document to a JSON file in the output directory.
+    The document is exported to a dictionary using the export_to_dict() method and written to a
+    file using the json.dumps() function.  If the conversion status is ConversionStatus.PARTIAL_SUCCESS,
+    it increments the partial_success_count and logs a message indicating that the document was partially
+    converted with the errors.  If the conversion status is ConversionStatus.FAILURE, it increments the
+    failure_count and logs a message indicating that the document failed to convert.
+    Finally, the function logs a message indicating the total number of documents processed, the number
+    of successful conversions, the number of partially successful conversions, and
+    the number of failed conversions. It then returns the three counters as a tuple.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
 
     success_count = 0
@@ -126,9 +151,10 @@ def _export_documents(
 #  InstructLab functionality.  As part of unifying the code base, we should reconsider how this
 #  is configured.
 def _initialize_docling():
-    # Search for the pipeline in User and Site data directories
-    # then for a package defined pipeline
-    # and finally pipelines referenced by absolute path
+    """
+    Initializes a Docling document converter for converting files (e.g., PDF) to Docling JSON format for use by
+    the Docling chunkers.
+    """
     data_dirs = [os.path.join(xdg_data_home(), "instructlab", "sdg")]
     data_dirs.extend(os.path.join(dir, "instructlab", "sdg") for dir in xdg_data_dirs())
 
@@ -170,6 +196,11 @@ def _initialize_docling():
 # Adapted from sdg.utils.chunkers because that code is being refactored so we want to avoid importing anything from it.
 # TODO: Once the code base has settled down, we should make sure this code exists only in one place.
 def _resolve_ocr_options() -> OcrOptions:
+    """
+    Attempts to resolve OCR options for a PDF document. It first tries to use the Tesseract OCR library,
+    and if that fails, it tries the EasyOCR library. If neither of these libraries are available, it
+    returns None to indicate that OCR will not be used.
+    """
     # First, attempt to use tesserocr
     try:
         ocr_options = TesseractOcrOptions()
