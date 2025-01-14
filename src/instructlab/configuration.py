@@ -275,6 +275,14 @@ class _convert(BaseModel):
         default_factory=lambda: DEFAULTS.CONVERTED_DOCUMENTS_DIR,
         description="Directory where converted documents are stored.",
     )
+    taxonomy_path: StrictStr = Field(
+        default_factory=lambda: DEFAULTS.TAXONOMY_DIR,
+        description="Directory where taxonomy is stored and accessed from.",
+    )
+    taxonomy_base: StrictStr = Field(
+        default=DEFAULTS.TAXONOMY_BASE,
+        description="Branch of taxonomy used to calculate diff against.",
+    )
 
 
 class _generate(BaseModel):

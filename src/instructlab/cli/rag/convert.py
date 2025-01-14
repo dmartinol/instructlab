@@ -27,16 +27,9 @@ logger = logging.getLogger(__name__)
     help="The folder with user documents to process. In case it's missing, the knowledge taxonomy files will be processed instead.",
 )
 @click.option(
-    "--taxonomy-path",
-    required=False,
-    type=click.Path(file_okay=False, readable=True),
-    help="Directory where taxonomy is stored and accessed from.",
+    "--taxonomy-path", required=False, type=click.Path(file_okay=False, readable=True)
 )
-@click.option(
-    "--taxonomy-base",
-    required=False,
-    help="Branch of taxonomy used to calculate diff against.",
-)
+@click.option("--taxonomy-base", required=False, cls=clickext.ConfigOption)
 @click.option(
     "--output-dir",
     type=click.Path(file_okay=False, writable=True),
@@ -53,9 +46,6 @@ def convert(
     output_dir,
 ):
     """The document processing pipeline"""
-
-    output_dir = "path/to/your/directory"
-
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
