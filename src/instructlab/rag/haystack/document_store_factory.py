@@ -43,7 +43,7 @@ def create_in_memory_document_retriever(
     """
     Creates a `DocumentStoreRetriever` based on Haystack components.
     """
-    
+
     return HaystackDocumentStoreRetriever(
         document_store_uri=document_store_uri,
         document_store_collection_name=document_store_collection_name,

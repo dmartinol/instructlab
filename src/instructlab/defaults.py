@@ -113,6 +113,7 @@ class _InstructlabDefaults:
         "lora_target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
         "use_dolomite": False,
     }
+    SUPPORTED_CONTENT_FORMATS = ["json"]
 
     def __init__(self):
         self._reset()

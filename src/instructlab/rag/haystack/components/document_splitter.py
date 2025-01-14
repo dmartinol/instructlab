@@ -16,22 +16,23 @@ from haystack.core.serialization import (  # type: ignore
 )
 from pydantic_core._pydantic_core import ValidationError
 
+# First Party
+from instructlab.defaults import DEFAULTS
+
 logger = logging.getLogger(__name__)
 
 
 @component
 class DoclingDocumentSplitter:
-    SUPPORTED_CONTENT_FORMATS = ["json"]
-
     def __init__(self, embedding_model_id=None, content_format=None, max_tokens=None):
         self.__chunker = HybridChunker(
             tokenizer=embedding_model_id, max_tokens=max_tokens
         )
         self.__embedding_model_id = embedding_model_id
 
-        if content_format not in self.SUPPORTED_CONTENT_FORMATS:
+        if content_format not in DEFAULTS.SUPPORTED_CONTENT_FORMATS:
             raise ValueError(
-                f"Only the following input formats are currently supported: {self.SUPPORTED_CONTENT_FORMATS}."
+                f"Only the following input formats are currently supported: {DEFAULTS.SUPPORTED_CONTENT_FORMATS}."
             )
         self.__content_format = content_format
 
