@@ -270,10 +270,12 @@ class _serve(BaseModel):
 
 class _convert(BaseModel):
     """Class describing configuration of the 'ilab rag convert' sub-command."""
+
     output_dir: StrictStr = Field(
         default_factory=lambda: DEFAULTS.CONVERTED_DOCUMENTS_DIR,
         description="Directory where converted documents are stored.",
     )
+
 
 class _generate(BaseModel):
     """Class describing configuration of the 'generate' sub-command."""

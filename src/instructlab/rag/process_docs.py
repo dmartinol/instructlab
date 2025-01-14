@@ -9,8 +9,16 @@ import time
 
 # Third Party
 from docling.datamodel.base_models import ConversionStatus  # type: ignore
+from docling.datamodel.base_models import InputFormat  # type: ignore
 from docling.datamodel.document import ConversionResult  # type: ignore
+from docling.datamodel.pipeline_options import EasyOcrOptions  # type: ignore
+from docling.datamodel.pipeline_options import OcrOptions  # type: ignore
+from docling.datamodel.pipeline_options import PdfPipelineOptions  # type: ignore
+from docling.datamodel.pipeline_options import TesseractOcrOptions  # type: ignore
 from docling.document_converter import DocumentConverter  # type: ignore
+from docling.document_converter import PdfFormatOption  # type: ignore
+from docling.models.easyocr_model import EasyOcrModel  # type: ignore
+from docling.models.tesseract_ocr_model import TesseractOcrModel  # type: ignore
 
 # First Party
 from instructlab.rag.taxonomy_utils import lookup_knowledge_files
@@ -35,7 +43,35 @@ def process_docs_from_taxonomy(taxonomy_path, taxonomy_base, output_dir):
         process_docs_from_folder(temp_dir, output_dir)
 
 
-def process_docs_from_folder(input_dir, output_dir):
+# Copied from sdg.utils.chunkers because that code is being refactored so we want to avoid importing anything from it.
+# TODO: Once the code base has settled down, we should make sure this code exists only in one place.
+def resolve_ocr_options() -> OcrOptions:
+    # First, attempt to use tesserocr
+    try:
+        ocr_options = TesseractOcrOptions()
+
+        _ = TesseractOcrModel(True, ocr_options)
+        return ocr_options
+    except ImportError:
+        # No tesserocr, so try something else
+        pass
+    try:
+        ocr_options = EasyOcrOptions()
+        # Keep easyocr models on the CPU instead of GPU
+        ocr_options.use_gpu = False
+        # triggers torch loading, import lazily
+
+        _ = EasyOcrModel(True, ocr_options)
+        return ocr_options
+    except ImportError:
+        # no easyocr either, so don't use any OCR
+        logger.error(
+            "Failed to load Tesseract and EasyOCR - disabling optical character recognition in PDF documents"
+        )
+        return None
+
+
+def process_docs_from_folder(input_dir, output_dir, docling_model_path=None):
     """
     Process user documents from a given `input_dir` folder to the given `output_dir` folder, using docling converters.
     Latest version of docling schema is used (currently, v2).
@@ -47,8 +83,20 @@ def process_docs_from_folder(input_dir, output_dir):
     source_files = _load_source_files(input_dir=input_dir)
     logger.info(f"Transforming source files {[p.name for p in source_files]}")
 
-    doc_converter = DocumentConverter()
+    pipeline_options = PdfPipelineOptions(
+        artifacts_path=docling_model_path,
+        do_ocr=False,
+    )
+    ocr_options = resolve_ocr_options()
+    if ocr_options is not None:
+        pipeline_options.do_ocr = True
+        pipeline_options.ocr_options = ocr_options
 
+    doc_converter = DocumentConverter(
+        format_options={
+            InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+        }
+    )
     start_time = time.time()
     conv_results = doc_converter.convert_all(
         source_files,

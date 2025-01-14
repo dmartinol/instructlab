@@ -24,18 +24,18 @@ logger = logging.getLogger(__name__)
     required=False,
     type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True),
     default=None,
-    help="The folder with user documents to process. In case it's missing, the knowledge taxonomy files will be processed instead."
+    help="The folder with user documents to process. In case it's missing, the knowledge taxonomy files will be processed instead.",
 )
 @click.option(
     "--taxonomy-path",
     required=False,
     type=click.Path(file_okay=False, readable=True),
-    help="Directory where taxonomy is stored and accessed from."
+    help="Directory where taxonomy is stored and accessed from.",
 )
 @click.option(
     "--taxonomy-base",
     required=False,
-    help="Branch of taxonomy used to calculate diff against."
+    help="Branch of taxonomy used to calculate diff against.",
 )
 @click.option(
     "--output-dir",
