@@ -14,7 +14,7 @@ from instructlab import lab
 
 def test_convert_pdf_from_directory():
     """
-    Tests converting from the sample PDF in tests/testdata/temp_datasets_documents/pdf.
+    Tests converting from the sample PDF in tests/testdata/documents/pdf.
     Verifies that it says that it is processing and finished that sample PDF.
     Also verifies that the expected JSON file exists in the temp directory at the end.
     """
@@ -35,7 +35,7 @@ def test_convert_pdf_from_directory():
 
 def test_convert_md_from_directory():
     """
-    Tests converting from the sample Markdown file in tests/testdata/temp_datasets_documents/md.
+    Tests converting from the sample Markdown file in tests/testdata/documents/md.
     Verifies that the expected JSON file exists in the temp directory at the end.
     """
     test_input_dir = "tests/testdata/documents/md"
