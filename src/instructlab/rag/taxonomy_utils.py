@@ -34,23 +34,3 @@ def lookup_knowledge_files(taxonomy_path, taxonomy_base, temp_dir) -> list[Path]
         )
 
     return knowledge_files
-
-
-def lookup_processed_documents_folder(output_dir: str) -> Optional[Path]:
-    """
-    Takes an SDG output directory as input and returns the path to the latest processed documents folder
-    if it exists.  For use in integrating with SDG by pulling in SDG outputs.
-    """
-    latest_folder = (
-        max(Path(output_dir).iterdir(), key=lambda d: d.stat().st_mtime)
-        if Path(output_dir).exists()
-        else None
-    )
-    logger.info(f"Latest processed folder is {latest_folder}")
-
-    if latest_folder is not None:
-        docling_folder = Path.joinpath(latest_folder, "docling-artifacts")
-        logger.debug(f"Docling folder: {docling_folder}")
-        if docling_folder.exists():
-            return docling_folder
-    return None
