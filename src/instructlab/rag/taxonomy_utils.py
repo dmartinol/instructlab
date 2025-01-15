@@ -37,11 +37,15 @@ def lookup_knowledge_files(taxonomy_path, taxonomy_base, temp_dir) -> list[Path]
 from pathlib import Path
 from typing import Optional
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
 
 def lookup_processed_documents_folder(output_dir: str) -> Optional[Path]:
+    if not os.listdir(output_dir):
+        return None
+
     latest_folder = (
         max(Path(output_dir).iterdir(), key=lambda d: d.stat().st_mtime)
         if Path(output_dir).exists()
