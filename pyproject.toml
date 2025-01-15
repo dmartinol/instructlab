@@ -37,12 +37,17 @@ issues = "https://github.com/instructlab/instructlab/issues"
 
 # command entry points
 [project.entry-points."instructlab.command"]
+"process" = "instructlab.cli.process.process:process"
 "config" = "instructlab.config.config:config"
 "data" = "instructlab.cli.data.data:data"
 "model" = "instructlab.model.model:model"
 "rag" = "instructlab.cli.rag.rag:rag"
 "system" = "instructlab.cli.system.system:system"
 "taxonomy" = "instructlab.taxonomy.taxonomy:taxonomy"
+
+[project.entry-points."instructlab.command.process"]
+"list" = "instructlab.cli.process.list:list"
+"attach" = "instructlab.cli.process.attach:attach"
 
 [project.entry-points."instructlab.command.config"]
 "edit" = "instructlab.config.edit:edit"
@@ -57,7 +62,7 @@ issues = "https://github.com/instructlab/instructlab/issues"
 "chat" = "instructlab.model.chat:chat"
 "convert" = "instructlab.model.convert:convert"
 "download" = "instructlab.model.download:download"
-"evaluate" = "instructlab.model.evaluate:evaluate"
+"evaluate" = "instructlab.cli.model.evaluate:evaluate"
 "serve" = "instructlab.cli.model.serve:serve"
 "test" = "instructlab.model.test:test"
 "train" = "instructlab.cli.model.train:train"
@@ -103,14 +108,16 @@ include = [
   "instructlab.generator",
   "instructlab.cli",
   "instructlab.cli.model",
+  "instructlab.cli.process",
   "instructlab.cli.rag",
+  "instructlab.llamacpp",
+  "instructlab.mlx_explore",
   "instructlab.model",
+  "instructlab.process",
   "instructlab.rag",
   "instructlab.train",
   "instructlab.train.lora_mlx",
   "instructlab.train.lora_mlx.models",
-  "instructlab.llamacpp",
-  "instructlab.mlx_explore",
 ]
 
 [tool.check-wheel-contents]
@@ -202,6 +209,7 @@ exclude = [
 [[tool.mypy.overrides]]
 # packages without typing annotations, without stubs, or not available.
 module = [
+  "boto3",
   "click_didyoumean",
   "datasets",
   "fire",
@@ -213,6 +221,7 @@ module = [
   "instructlab.training",
   "mlx.*",
   "optimum.habana.*",
+  "ruamel",
   "sentencepiece",
   "trl",
   "transformers",

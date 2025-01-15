@@ -589,6 +589,54 @@ class _train(BaseModel):
     )
 
 
+class _document_store(BaseModel):
+    """Class describing configuration of document store backend for RAG."""
+
+    uri: str = Field(default="embeddings.db", description="Document store service URI.")
+    collection_name: str = Field(
+        default="ilab", description="Document store collection name."
+    )
+
+
+class _embedding_model(BaseModel):
+    """Class describing configuration of embedding parameters for RAG."""
+
+    # model configuration
+    model_config = ConfigDict(extra="ignore", protected_namespaces=())
+
+    model_dir: str = Field(
+        default=DEFAULTS.MODELS_DIR,
+        description="The default system model location store, located in the data directory.",
+    )
+    model_name: str = Field(
+        default_factory=lambda: DEFAULTS.DEFAULT_EMBEDDING_MODEL,
+        description="Embedding model to use for RAG.",
+    )
+
+    def local_model_path(self) -> str:
+        if self.model_dir is None:
+            click.secho(f"Missing value for field model_dir in {vars(self)}")
+            raise click.exceptions.Exit(1)
+
+        if self.model_name is None:
+            click.secho(f"Missing value for field model_name in {vars(self)}")
+            raise click.exceptions.Exit(1)
+
+        return os.path.join(self.model_dir, self.model_name)
+
+
+class _retriever(BaseModel):
+    """Class describing configuration of retrieval parameters for RAG."""
+
+    top_k: int = Field(
+        default=20, description="The maximum number of documents to retrieve."
+    )
+    embedding_model: _embedding_model = Field(
+        default=_embedding_model(),
+        description="Embedding parameters for retrieval.",
+    )
+
+
 class _metadata(BaseModel):
     # model configuration
     model_config = ConfigDict(extra="ignore")
@@ -1230,6 +1278,7 @@ def ensure_storage_directories_exist() -> bool:
         DEFAULTS.TRAIN_ADDITIONAL_OPTIONS_DIR,
         DEFAULTS.PHASED_DIR,
         DEFAULTS.SYSTEM_PROFILE_DIR,
+        DEFAULTS.LOGS_DIR,
     ]
 
     for dirpath in dirs_to_make:
@@ -1388,8 +1437,7 @@ def init(
         )
 
     # special case: --help should always work
-    if config_obj is None and "--help" in sys.argv[1:]:
-        config_obj = get_default_config()
+    if not os.path.isfile(config_file) and "--help" in sys.argv[1:]:
         error_msg = None
 
     ctx.obj = Lab(config_obj, config_file, error_msg)
@@ -1513,5 +1561,6 @@ def storage_dirs_exist() -> bool:
         DEFAULTS.TRAIN_ADDITIONAL_OPTIONS_DIR,
         DEFAULTS.PHASED_DIR,
         DEFAULTS.SYSTEM_PROFILE_DIR,
+        DEFAULTS.LOGS_DIR,
     ]
     return all(os.path.exists(dirpath) for dirpath in dirs_to_check)
