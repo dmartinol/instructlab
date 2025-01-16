@@ -7,8 +7,14 @@ from unittest.mock import patch
 
 # Third Party
 from click.testing import CliRunner
-from docling.datamodel.base_models import DocumentStream, InputFormat  # type: ignore
+from docling.backend.docling_parse_v2_backend import DoclingParseV2DocumentBackend
+from docling.datamodel.base_models import (  # type: ignore
+    ConversionStatus,
+    DocumentStream,
+    InputFormat,
+)
 from docling.datamodel.document import ConversionResult  # type: ignore
+from docling.datamodel.document import InputDocument
 from docling.document_converter import FormatOption  # type: ignore
 
 # First Party
@@ -28,7 +34,15 @@ class MockDocumentConverter:
         source: Iterable[Union[Path, str, DocumentStream]],  # pylint: disable=unused-argument; noqa: ARG002
         raises_on_error: bool = True,  # pylint: disable=unused-argument; noqa: ARG002
     ) -> Iterator[ConversionResult]:
-        yield from []
+        for doc in source:
+            print(type(doc))
+            in_doc = InputDocument(
+                path_or_stream=doc,
+                format=InputFormat.PDF,
+                backend=DoclingParseV2DocumentBackend,
+            )
+            conv_res = ConversionResult(input=in_doc, status=ConversionStatus.SUCCESS)
+            yield conv_res
 
 
 def run_rag_convert_test(
@@ -47,6 +61,7 @@ def run_rag_convert_test(
             assert (
                 result.exit_code == 0
             ), f"Unexpected failure for parameters {params}: {result.output}"
+            assert params[1] in result.output in result.output
         else:
             assert (
                 result.exit_code != 0
