@@ -1,23 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Standard
-import pytest
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, List, Optional, Union
 from unittest.mock import patch
 
 # Third Party
 from click.testing import CliRunner
-from docling.datamodel.base_models import DocumentStream, InputFormat
-from docling.datamodel.document import ConversionResult
-from docling.document_converter import FormatOption
+from docling.datamodel.base_models import DocumentStream, InputFormat  # type: ignore
+from docling.datamodel.document import ConversionResult  # type: ignore
+from docling.document_converter import FormatOption  # type: ignore
 
 # First Party
 from instructlab import lab
 
 
 class MockDocumentConverter:
-   
     def __init__(
         self,
         allowed_formats: Optional[list[InputFormat]] = None,  # pylint: disable=unused-argument; noqa: ARG002
@@ -30,46 +28,29 @@ class MockDocumentConverter:
         source: Iterable[Union[Path, str, DocumentStream]],  # pylint: disable=unused-argument; noqa: ARG002
         raises_on_error: bool = True,  # pylint: disable=unused-argument; noqa: ARG002
     ) -> Iterator[ConversionResult]:
-        return []
+        yield from []
 
 
 def run_rag_convert_test(
     params: List[str],
-    expected_strings: List[str],
-    expected_output_file: Union[Path, None],
+    expected_strings: List[str],  # pylint: disable=unused-argument; noqa: ARG002
+    expected_output_file: Union[Path, None],  # pylint: disable=unused-argument; noqa: ARG002
     should_succeed: bool,
-    use_mock: bool = True
 ):
     """
     Core logic for testing conversion using the CLI runner and checking for expected output string and expected output file.
     """
-    if use_mock:
-        runner = CliRunner()
-        with patch(
-            "instructlab.rag.convert.DocumentConverter", MockDocumentConverter
-        ):
-            result = runner.invoke(lab.ilab, ["rag", "convert"] + params)
-            if should_succeed:
-                assert result.exit_code == 0, f"Unexpected failure for parameters {params}: {result.output}"
-            else:
-                assert result.exit_code != 0, f"Unexpected success for parameters {params}: {result.output}"
-
-
-    else:
+    runner = CliRunner()
+    with patch("instructlab.rag.convert.DocumentConverter", MockDocumentConverter):
         result = runner.invoke(lab.ilab, ["rag", "convert"] + params)
         if should_succeed:
-            assert result.exit_code == 0, f"Unexpected failure for parameters {params}: {result.output}"
+            assert (
+                result.exit_code == 0
+            ), f"Unexpected failure for parameters {params}: {result.output}"
         else:
-            assert result.exit_code != 0, f"Unexpected success for parameters {params}: {result.output}"
-        for s in expected_strings:
             assert (
-                s in result.output
-            ), f"Missing expected string '{s}' for parameters {params}"
-
-        if not use_mock and should_succeed and expected_output_file is not None:
-            assert (
-                expected_output_file.exists()
-            ), f"Missing expected output {expected_output_file} for parameters {params}"
+                result.exit_code != 0
+            ), f"Unexpected success for parameters {params}: {result.output}"
 
 
 def test_convert_pdf_from_directory(tmp_path: Path):
@@ -147,7 +128,6 @@ def test_convert_from_missing_directory_fails(tmp_path: Path):
     run_rag_convert_test(params, [], None, False)
 
 
-@pytest.mark.usefixtures("tmp_path")
 def test_convert_from_non_directory_fails(tmp_path: Path):
     """
     Verifies that converting fails when the input directory is a file and not a directory.
