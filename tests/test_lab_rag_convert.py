@@ -62,6 +62,7 @@ def run_rag_convert_test(
                 result.exit_code == 0
             ), f"Unexpected failure for parameters {params}: {result.output}"
             assert params[1] in result.output in result.output
+            assert expected_output_file.exists()
         else:
             assert (
                 result.exit_code != 0
