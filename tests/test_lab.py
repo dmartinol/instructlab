@@ -114,7 +114,7 @@ subcommands: list[Command] = [
     Command(("config", "init"), needs_config=False, should_fail=False),
     Command(("config", "show")),
     Command(("model",), needs_config=False, should_fail=False),
-    Command(("model", "chat")),
+    Command(("model", "chat"), ("--rag",)),
     Command(("model", "convert"), ("--model-dir", "test")),
     Command(("model", "download")),
     Command(("model", "evaluate"), ("--benchmark", "mmlu")),

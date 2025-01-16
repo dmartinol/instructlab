@@ -127,41 +127,57 @@ class _general(BaseModel):
         return self
 
 
-class _rag_retriever_embedder(BaseModel):
-    """Class describing configuration of embedding parameters for RAG."""
-    embedding_model_name: str = Field(
-        default_factory=lambda: DEFAULTS.DEFAULT_EMBEDDING_MODEL,
-        description="Embedding model to use for RAG."
-    )
-
-
-class _chat_rag_retriever(BaseModel):
-    """Class describing configuration of retrieval parameters for RAG."""
-    top_k: int = Field(
-        default=20,
-        description="The maximum number of documents to retrieve."
-    )
-    embedder: _rag_retriever_embedder = Field(
-        default=_rag_retriever_embedder(),
-        description="Embedding parameters for retrieval."
-    )
-
-
-class _rag_document_store(BaseModel):
+class _document_store(BaseModel):
     """Class describing configuration of document store backend for RAG."""
-    type: str = Field(
-        default="milvuslite",
-        description="Document store implementation."
-    )
+
     uri: str = Field(
         default=DEFAULTS.DEFAULT_DOCUMENT_STORE_PATH,
         description="Document store service URI."
     )
     collection_name: str = Field(
-        default="ilab",
+        default=DEFAULTS.DOCUMENT_STORE_COLLECTION_NAME,
         description="Document store collection name."
     )
 
+
+class _embedding_model(BaseModel):
+    """Class describing configuration of embedding parameters for RAG."""
+
+    # model configuration
+    model_config = ConfigDict(extra="ignore", protected_namespaces=())
+
+    model_dir: str = Field(
+        default_factory=lambda: DEFAULTS.MODELS_DIR,
+        description="The default system model location store, located in the data directory.",
+    )
+    model_name: str = Field(
+        default_factory=lambda: DEFAULTS.DEFAULT_EMBEDDING_MODEL,
+        description="Embedding model to use for RAG.",
+    )
+
+    def local_model_path(self) -> str:
+        if self.model_dir is None:
+            click.secho(f"Missing value for field model_dir in {vars(self)}")
+            raise click.exceptions.Exit(1)
+
+        if self.model_name is None:
+            click.secho(f"Missing value for field model_name in {vars(self)}")
+            raise click.exceptions.Exit(1)
+
+        return os.path.join(self.model_dir, self.model_name)
+
+
+class _retriever(BaseModel):
+    """Class describing configuration of retrieval parameters for RAG."""
+
+    top_k: int = Field(
+        default=DEFAULTS.RETRIEVER_TOP_K,
+        description="The maximum number of documents to retrieve."
+    )
+    embedding_model: _embedding_model = Field(
+        default=_embedding_model(),
+        description="Embedding parameters for retrieval.",
+    )
 
 class _chat_rag(BaseModel):
     """Class containing configuration for retrieval augmented generation"""
@@ -169,12 +185,12 @@ class _chat_rag(BaseModel):
         default=False,
         description="Enable or disable the RAG pipeline."
     )
-    retriever: _chat_rag_retriever = Field(
-        default=_chat_rag_retriever(),
+    retriever: _retriever = Field(
+        default=_retriever(),
         description="Retrieval parameters for RAG."
     )
-    document_store: _rag_document_store = Field(
-        default=_rag_document_store(),
+    document_store: _document_store = Field(
+        default=_document_store(),
         description="Document store configuration for RAG."
     )
 
@@ -215,7 +231,7 @@ class _chat(BaseModel):
         description="Controls the randomness of the model's responses. Lower values make the output more deterministic, while higher values produce more random results.",
     )
     rag: _chat_rag = Field(
-        default=_chat_rag(retriever=_chat_rag_retriever(), document_store=_rag_document_store()),
+        default=_chat_rag(retriever=_retriever(), document_store=_document_store()),
         description="Controls retrieval augmented generation parameters."
     )
 
@@ -625,45 +641,6 @@ class _train(BaseModel):
     training_journal: str | None = Field(
         default=None,
         description="Optional path to a yaml file that tracks the progress of multiphase training.",
-    )
-
-
-class _embedding_model(BaseModel):
-    """Class describing configuration of embedding parameters for RAG."""
-
-    # model configuration
-    model_config = ConfigDict(extra="ignore", protected_namespaces=())
-
-    model_dir: str = Field(
-        default=DEFAULTS.MODELS_DIR,
-        description="The default system model location store, located in the data directory.",
-    )
-    model_name: str = Field(
-        default_factory=lambda: DEFAULTS.DEFAULT_EMBEDDING_MODEL,
-        description="Embedding model to use for RAG.",
-    )
-
-    def local_model_path(self) -> str:
-        if self.model_dir is None:
-            click.secho(f"Missing value for field model_dir in {vars(self)}")
-            raise click.exceptions.Exit(1)
-
-        if self.model_name is None:
-            click.secho(f"Missing value for field model_name in {vars(self)}")
-            raise click.exceptions.Exit(1)
-
-        return os.path.join(self.model_dir, self.model_name)
-
-
-class _retriever(BaseModel):
-    """Class describing configuration of retrieval parameters for RAG."""
-
-    top_k: int = Field(
-        default=20, description="The maximum number of documents to retrieve."
-    )
-    embedding_model: _embedding_model = Field(
-        default=_embedding_model(),
-        description="Embedding parameters for retrieval.",
     )
 
 

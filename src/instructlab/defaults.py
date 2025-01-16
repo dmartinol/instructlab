@@ -80,6 +80,8 @@ class _InstructlabDefaults:
     GRANITE_GGUF_MODEL_NAME = "granite-7b-lab-Q4_K_M.gguf"
     GRANITE_EMBEDDING_MODEL_NAME = "ibm-granite/granite-embedding-125m-english"
     DOCUMENT_STORE_NAME = "embeddings.db"
+    DOCUMENT_STORE_COLLECTION_NAME = "ilab"
+    RETRIEVER_TOP_K = 20
     MERLINITE_GGUF_MODEL_NAME = "merlinite-7b-lab-Q4_K_M.gguf"
     MISTRAL_GGUF_MODEL_NAME = "mistral-7b-instruct-v0.2.Q4_K_M.gguf"
     MODEL_REPO = "instructlab/granite-7b-lab"

@@ -33,6 +33,7 @@ from instructlab.client_utils import HttpClientParams
 
 # Local
 from ..client_utils import http_client
+from ..defaults import DEFAULTS
 from ..rag.document_store import DocumentStoreRetriever
 from ..rag.document_store_factory import create_document_retriever
 from ..utils import get_cli_helper_sysprompt, get_model_arch, get_sysprompt
@@ -177,9 +178,43 @@ def is_openai_server_and_serving_model(
 )
 @click.option(
     "--rag",
+    "rag_enabled",
+    default=False,
     is_flag=True,
+)
+@click.option(
+    "--document-store-uri",
+    type=click.STRING,
     cls=clickext.ConfigOption,
-    required=True,  # default from config
+    config_sections="document_store",
+)
+@click.option(
+    "--document-store-collection-name",
+    "collection_name",
+    type=click.STRING,
+    cls=clickext.ConfigOption,
+    config_sections="document_store",
+)
+@click.option(
+    "--retriever-embedding-model-name",
+    "embedding_model_name",
+    type=click.STRING,
+    cls=clickext.ConfigOption,
+    config_sections="embedding_model",
+)
+@click.option(
+    "--retriever-embedding-model-dir",
+    "embedding_model_dir",
+    type=click.Path(),
+    cls=clickext.ConfigOption,
+    config_sections="embedding_model",
+)
+@click.option(
+    "--retriever-top-k",
+    "top_k",
+    type=click.INT,
+    default=DEFAULTS.RETRIEVER_TOP_K,
+    cls=clickext.ConfigOption,
 )
 @click.pass_context
 @clickext.display_params
@@ -200,6 +235,12 @@ def chat(
     model_family,
     serving_log_file,
     temperature,
+    rag_enabled,
+    document_store_uri,
+    collection_name,
+    embedding_model_dir,
+    embedding_model_name,
+    top_k,
 ):
     """Runs a chat using the modified model"""
     # pylint: disable=import-outside-toplevel
@@ -325,6 +366,12 @@ def chat(
             max_ctx_size=max_ctx_size,
             temperature=temperature,
             backend_type=backend_type,
+            rag_enabled=rag_enabled,
+            document_store_uri=document_store_uri,
+            collection_name=collection_name,
+            embedding_model_dir=embedding_model_dir,
+            embedding_model_name=embedding_model_name,
+            top_k=top_k,
         )
     except ChatException as exc:
         click.secho(f"Executing chat failed with: {exc}", fg="red")
@@ -819,6 +866,12 @@ def chat_cli(
     max_ctx_size,
     temperature,
     backend_type,
+    rag_enabled,
+    document_store_uri,
+    collection_name,
+    embedding_model_dir,
+    embedding_model_name,
+    top_k,
 ):
     """Starts a CLI-based chat with the server"""
     client = OpenAI(
@@ -857,14 +910,16 @@ def chat_cli(
     loaded["messages"] = [{"role": "system", "content": sys_prompt}]
 
     # Instantiate retriever if RAG is enabled
-    if ctx.obj.config.chat.rag.enabled:
-        logger.info("RAG enabled for chat; initializing retriever")
+    if rag_enabled:
+        logger.debug("RAG enabled for chat; initializing retriever")
         retriever: DocumentStoreRetriever | None = create_document_retriever(
-            document_store_config=ctx.obj.config.chat.rag.document_store,
-            retriever_config=ctx.obj.config.chat.rag.retriever,
+            document_store_uri=document_store_uri,
+            document_store_collection_name=collection_name,
+            top_k=top_k,
+            embedding_model_path=os.path.join(embedding_model_dir, embedding_model_name),
         )
     else:
-        logger.info("RAG not enabled for chat; skipping retrieval setup")
+        logger.debug("RAG not enabled for chat; skipping retrieval setup")
         retriever: DocumentStoreRetriever | None = None
 
     # Session from CLI

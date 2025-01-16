@@ -16,6 +16,37 @@ chat:
   # Model to be used for chatting with.
   # Default: /cache/instructlab/models/granite-7b-lab-Q4_K_M.gguf
   model: /cache/instructlab/models/granite-7b-lab-Q4_K_M.gguf
+  # Controls retrieval augmented generation parameters.
+  # Default: enabled=False retriever=_retriever(top_k=20, embedding_model=_embedding_model(model_dir='/Users/astoyano/.cache/instructlab/models', model_name='/Users/astoyano/.cache/instructlab/models/ibm-granite/granite-embedding-125m-english')) document_store=_document_store(uri='/Users/astoyano/.local/share/instructlab/embeddings.db', collection_name='ilab')
+  rag:
+    # Document store configuration for RAG.
+    # Default: uri='/Users/astoyano/.local/share/instructlab/embeddings.db' collection_name='ilab'
+    document_store:
+      # Document store collection name.
+      # Default: ilab
+      collection_name: ilab
+      # Document store service URI.
+      # Default: /Users/astoyano/.local/share/instructlab/embeddings.db
+      uri: /Users/astoyano/.local/share/instructlab/embeddings.db
+    # Enable or disable the RAG pipeline.
+    # Default: False
+    enabled: false
+    # Retrieval parameters for RAG.
+    # Default: top_k=20 embedding_model=_embedding_model(model_dir='/Users/astoyano/.cache/instructlab/models', model_name='/Users/astoyano/.cache/instructlab/models/ibm-granite/granite-embedding-125m-english')
+    retriever:
+      # Embedding parameters for retrieval.
+      # Default: model_dir='/Users/astoyano/.cache/instructlab/models' model_name='/Users/astoyano/.cache/instructlab/models/ibm-granite/granite-embedding-125m-english'
+      embedding_model:
+        # The default system model location store, located in the data directory.
+        # Default: /cache/instructlab/models
+        model_dir: /Users/astoyano/.cache/instructlab/models
+        # Embedding model to use for RAG.
+        # Default: /cache/instructlab/models/ibm-granite/granite-embedding-125m-english
+        model_name: 
+          /Users/astoyano/.cache/instructlab/models/ibm-granite/granite-embedding-125m-english
+      # The maximum number of documents to retrieve.
+      # Default: 20
+      top_k: 20
   # Filepath of a dialog session file.
   # Default: None
   session:
@@ -23,18 +54,6 @@ chat:
   # more deterministic, while higher values produce more random results.
   # Default: 1.0
   temperature: 1.0
-  # Enable retrieval augmented generation in chat.
-  # Default: False
-  rag:
-    enabled: false
-    document_store:
-      collection_name: ilab
-      type: milvuslite
-      uri: embeddings.db
-    retriever:
-      embedder:
-        embedding_model_name: ibm-granite/granite-embedding-125m-english
-        top_k: 20
   # Enable vim keybindings for chat.
   # Default: False
   vi_mode: false

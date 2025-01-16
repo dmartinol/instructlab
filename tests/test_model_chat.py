@@ -32,14 +32,11 @@ def test_model_name(model_path, expected_name):
 
 def test_retriever():
     with tempfile.TemporaryDirectory() as temp_dir:
-        document_store_config = DocumentStoreConfig(
-            uri=os.path.join(temp_dir, "any.db"),
-            collection_name="default",
-        )
-        retriever_config = RetrieverConfig()
         retriever: DocumentStoreRetriever = create_document_retriever(
-            document_store_config=document_store_config,
-            retriever_config=retriever_config,
+            document_store_uri=os.path.join(temp_dir, "any.db"),
+            document_store_collection_name="any",
+            top_k=10,
+            embedding_model_path=os.path.join(temp_dir, "embeddings.model"),
         )
 
         chatbot = ConsoleChatBot(model="any.model", client=None, retriever=retriever, loaded={})
