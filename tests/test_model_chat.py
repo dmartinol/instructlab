@@ -1,24 +1,18 @@
 # Standard
-import logging
-import os
-import sys
-import tempfile
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 import contextlib
+import logging
 import re
-from haystack import component, Document
 
 # Third Party
 from rich.console import Console
 import pytest
 
-from instructlab.defaults import DEFAULTS
 # First Party
 from instructlab.model.chat import ConsoleChatBot
-from instructlab.rag.document_store import DocumentStoreRetriever, DocumentStoreIngestor
-from instructlab.rag.document_store_factory import create_document_retriever, create_document_store_ingestor
 
 logger = logging.getLogger(__name__)
+
 
 @pytest.mark.parametrize(
     "model_path,expected_name",
@@ -35,7 +29,9 @@ def test_model_name(model_path, expected_name):
 
 def test_retriever_is_called_when_present():
     retriever = MagicMock()
-    chatbot = ConsoleChatBot(model="/var/model/file", client=None, retriever=retriever, loaded={})
+    chatbot = ConsoleChatBot(
+        model="/var/model/file", client=None, retriever=retriever, loaded={}
+    )
     assert chatbot.retriever == retriever
     user_query = "test"
     try:

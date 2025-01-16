@@ -36,8 +36,6 @@ from ..client_utils import http_client
 from ..defaults import DEFAULTS
 from ..rag.document_store import DocumentStoreRetriever
 from ..rag.document_store_factory import create_document_retriever
-from ..rag.haystack.component_factory import create_retriever, create_document_store
-from ..rag.haystack.document_store_factory import create_in_memory_document_retriever
 from ..utils import get_cli_helper_sysprompt, get_model_arch, get_sysprompt
 from .backends import backends
 
@@ -186,29 +184,24 @@ def is_openai_server_and_serving_model(
 )
 @click.option(
     "--document-store-uri",
+    "uri",
     type=click.STRING,
     cls=clickext.ConfigOption,
-    #config_sections={"chat":{"rag":"document_store"}},
+    config_sections="rag.document_store",
 )
 @click.option(
     "--document-store-collection-name",
     "collection_name",
     type=click.STRING,
     cls=clickext.ConfigOption,
-    #config_sections={"chat":{"rag":"document_store"}},
+    config_sections="rag.document_store",
 )
 @click.option(
     "--retriever-embedding-model-name",
     "embedding_model_name",
     type=click.STRING,
     cls=clickext.ConfigOption,
-    #config_sections={"chat":{"rag":{"retriever":{"embedding_model"}}}},
-)
-@click.option(
-    "--retriever-embedding-model-dir",
-    "embedding_model_dir",
-    type=click.Path(),
-    cls=clickext.ConfigOption,
+    config_sections="rag.retriever.embedding_model",
 )
 @click.option(
     "--retriever-top-k",
@@ -216,7 +209,7 @@ def is_openai_server_and_serving_model(
     type=click.INT,
     default=DEFAULTS.RETRIEVER_TOP_K,
     cls=clickext.ConfigOption,
-    #config_sections={"chat":{"rag":"retriever"}},
+    config_sections="rag.retriever",
 )
 @click.pass_context
 @clickext.display_params
@@ -238,9 +231,8 @@ def chat(
     serving_log_file,
     temperature,
     rag_enabled,
-    document_store_uri,
+    uri,
     collection_name,
-    embedding_model_dir,
     embedding_model_name,
     top_k,
 ):
@@ -369,9 +361,9 @@ def chat(
             temperature=temperature,
             backend_type=backend_type,
             rag_enabled=rag_enabled,
-            document_store_uri=document_store_uri,
+            document_store_uri=uri,
             collection_name=collection_name,
-            embedding_model=os.path.join(embedding_model_dir, embedding_model_name),
+            embedding_model=embedding_model_name,
             top_k=top_k,
         )
     except ChatException as exc:
@@ -916,7 +908,7 @@ def chat_cli(
             document_store_uri=document_store_uri,
             document_store_collection_name=collection_name,
             top_k=top_k,
-            embedding_model_path=embedding_model
+            embedding_model_path=embedding_model,
         )
     else:
         logger.debug("RAG not enabled for chat; skipping retrieval setup")
