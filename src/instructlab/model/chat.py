@@ -36,6 +36,8 @@ from ..client_utils import http_client
 from ..defaults import DEFAULTS
 from ..rag.document_store import DocumentStoreRetriever
 from ..rag.document_store_factory import create_document_retriever
+from ..rag.haystack.component_factory import create_retriever, create_document_store
+from ..rag.haystack.document_store_factory import create_in_memory_document_retriever
 from ..utils import get_cli_helper_sysprompt, get_model_arch, get_sysprompt
 from .backends import backends
 
@@ -186,28 +188,27 @@ def is_openai_server_and_serving_model(
     "--document-store-uri",
     type=click.STRING,
     cls=clickext.ConfigOption,
-    config_sections="document_store",
+    #config_sections={"chat":{"rag":"document_store"}},
 )
 @click.option(
     "--document-store-collection-name",
     "collection_name",
     type=click.STRING,
     cls=clickext.ConfigOption,
-    config_sections="document_store",
+    #config_sections={"chat":{"rag":"document_store"}},
 )
 @click.option(
     "--retriever-embedding-model-name",
     "embedding_model_name",
     type=click.STRING,
     cls=clickext.ConfigOption,
-    config_sections="embedding_model",
+    #config_sections={"chat":{"rag":{"retriever":{"embedding_model"}}}},
 )
 @click.option(
     "--retriever-embedding-model-dir",
     "embedding_model_dir",
     type=click.Path(),
     cls=clickext.ConfigOption,
-    config_sections="embedding_model",
 )
 @click.option(
     "--retriever-top-k",
@@ -215,6 +216,7 @@ def is_openai_server_and_serving_model(
     type=click.INT,
     default=DEFAULTS.RETRIEVER_TOP_K,
     cls=clickext.ConfigOption,
+    #config_sections={"chat":{"rag":"retriever"}},
 )
 @click.pass_context
 @clickext.display_params
@@ -369,8 +371,7 @@ def chat(
             rag_enabled=rag_enabled,
             document_store_uri=document_store_uri,
             collection_name=collection_name,
-            embedding_model_dir=embedding_model_dir,
-            embedding_model_name=embedding_model_name,
+            embedding_model=os.path.join(embedding_model_dir, embedding_model_name),
             top_k=top_k,
         )
     except ChatException as exc:
@@ -709,7 +710,7 @@ class ConsoleChatBot:  # pylint: disable=too-many-instance-attributes
         # TODO: what if context is already too long? note that current retriever implementation concatenates all docs
         # TODO: better way to check whether we should perform retrieval?
         if self.retriever is not None:
-            context = self.retriever.augmented_context(content)
+            context = self.retriever.augmented_context(user_query=content)
             self._update_conversation(context, "assistant")
 
         # Update message history and token counters
@@ -869,8 +870,7 @@ def chat_cli(
     rag_enabled,
     document_store_uri,
     collection_name,
-    embedding_model_dir,
-    embedding_model_name,
+    embedding_model,
     top_k,
 ):
     """Starts a CLI-based chat with the server"""
@@ -916,7 +916,7 @@ def chat_cli(
             document_store_uri=document_store_uri,
             document_store_collection_name=collection_name,
             top_k=top_k,
-            embedding_model_path=os.path.join(embedding_model_dir, embedding_model_name),
+            embedding_model_path=embedding_model
         )
     else:
         logger.debug("RAG not enabled for chat; skipping retrieval setup")
