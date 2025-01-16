@@ -171,14 +171,14 @@ test_list() {
 test_taxonomy() {
     task Update the taxonomy
 
-    # Extra large will pull in multiple freeform compositional skills to test the coverage of mulitple knowledge/skill leaf node usage. All other t-shirt sizes will only have one compositional skill.
+    # Extra large will pull in multiple freeform compositional skills to test the coverage of multiple knowledge/skill leaf node usage. All other t-shirt sizes will only have one compositional skill.
     if [ "$XLARGE" -eq 1 ]; then
-        step Add two compositional skills to the taxomony
+        step Add two compositional skills to the taxonomy
         mkdir -p "$DATA_HOME"/instructlab/taxonomy/compositional_skills/extraction/inference/qualitative/{e2e-siblings,e2e-palindrome}
         cp "$SCRIPTDIR"/test-data/compositional_skills/freeform/e2e-qna-freeform-siblings-skill.yaml "$DATA_HOME"/instructlab/taxonomy/compositional_skills/extraction/inference/qualitative/e2e-siblings/qna.yaml
         cp "$SCRIPTDIR"/test-data/compositional_skills/freeform/e2e-qna-freeform-palindrome-skill.yaml "$DATA_HOME"/instructlab/taxonomy/compositional_skills/extraction/inference/qualitative/e2e-palindrome/qna.yaml
     else
-        step Add compositional skill to the taxomony
+        step Add compositional skill to the taxonomy
         mkdir -p "$DATA_HOME"/instructlab/taxonomy/compositional_skills/extraction/inference/qualitative/e2e-siblings
         cp "$SCRIPTDIR"/test-data/compositional_skills/freeform/e2e-qna-freeform-siblings-skill.yaml "$DATA_HOME"/instructlab/taxonomy/compositional_skills/extraction/inference/qualitative/e2e-siblings/qna.yaml
     fi
@@ -192,7 +192,7 @@ test_taxonomy() {
         mkdir -p "$DATA_HOME"/instructlab/taxonomy/compositional_skills/extraction/answerability/e2e-yes_or_no
         cp "$SCRIPTDIR"/test-data/compositional_skills/grounded/e2e-qna-grounded-employee-skill.yaml "$DATA_HOME"/instructlab/taxonomy/compositional_skills/extraction/answerability/e2e-yes_or_no/qna.yaml
     elif [ "$XLARGE" -eq 1 ]; then
-        step Add two knowledge to the taxomony
+        step Add two knowledge to the taxonomy
         mkdir -p "$DATA_HOME"/instructlab/taxonomy/knowledge/{phoenix/overview/e2e-phoenix,mbta/overview/e2e-mbta}
         cp "$SCRIPTDIR"/test-data/knowledge/e2e-qna-knowledge-phoenix.yaml "$DATA_HOME"/instructlab/taxonomy/knowledge/phoenix/overview/e2e-phoenix/qna.yaml
         cp "$SCRIPTDIR"/test-data/knowledge/e2e-qna-knowledge-mbta.yaml    "$DATA_HOME"/instructlab/taxonomy/knowledge/mbta/overview/e2e-mbta/qna.yaml
@@ -210,8 +210,14 @@ test_taxonomy() {
 }
 
 test_generate() {
-    task Generate synthetic data
-    ilab data generate
+    task Generate synthetic data in detached mode
+    ilab data generate -dt
+    task Data generation started
+    task List all processes
+    ilab process list
+    task Listing processes Complete
+    task Attach to the most recent process
+    ilab process attach --latest
     task Synthetic data generation Complete
 }
 
@@ -469,11 +475,11 @@ wait_for_server() {
 
 # NOTE: If you add additional or modify existing options, please document them in 'docs/ci.md'
 usage() {
-    echo "Usage: $0 [-s] [-m] [-l] [-xl] [-h]"
+    echo "Usage: $0 [-s] [-m] [-l] [-x] [-h]"
     echo "  -s  Run small t-shirt size job"
     echo "  -m  Run medium t-shirt size job"
     echo "  -l  Run large t-shirt size job"
-    echo "  -xl  Run extra large t-shirt size job"
+    echo "  -x  Run extra large t-shirt size job"
     echo "  -p  Preserve the E2E_TEST_DIR for debugging"
     echo "  -h  Show this help text"
 }

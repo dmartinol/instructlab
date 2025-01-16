@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
+boto3>=1.35.96
 click>=8.1.7,<9.0.0
 click-didyoumean>=0.3.0
 datasets>=2.18.0
@@ -9,7 +10,7 @@ httpx>=0.25.0
 instructlab-eval>=0.4.2
 instructlab-quantize>=0.1.0
 instructlab-schema>=0.4.0
-instructlab-sdg>=0.6.2
+instructlab-sdg>=0.6.3
 instructlab-training>=0.6.0
 llama_cpp_python[server]==0.3.2
 mlx>=0.5.1,<0.6.0; sys_platform == 'darwin' and platform_machine == 'arm64'
@@ -37,3 +38,6 @@ wandb>=0.16.4
 xdg-base-dirs>=6.0.1
 psutil>=6.0.0
 huggingface_hub[hf_transfer]>=0.1.8
+haystack-ai>=2.8
+docling-core[chunking]>=2.10.0
+sentence-transformers>=3.0.0
