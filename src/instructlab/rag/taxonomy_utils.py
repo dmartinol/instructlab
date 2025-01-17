@@ -4,7 +4,9 @@
 
 # Standard
 from pathlib import Path
+from typing import Optional
 import logging
+import os
 
 # Third Party
 from instructlab.sdg.utils.taxonomy import read_taxonomy_leaf_nodes
@@ -33,13 +35,6 @@ def lookup_knowledge_files(taxonomy_path, taxonomy_base, temp_dir) -> list[Path]
         )
 
     return knowledge_files
-# Standard
-from pathlib import Path
-from typing import Optional
-import logging
-import os
-
-logger = logging.getLogger(__name__)
 
 
 def lookup_processed_documents_folder(output_dir: str) -> Optional[Path]:

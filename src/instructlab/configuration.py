@@ -285,14 +285,6 @@ class _convert(BaseModel):
     )
 
 
-class _rag(BaseModel):
-    """Class describing configuration of the 'ilab rag' command."""
-
-    convert: _convert = Field(
-        default_factory=_convert, description="RAG convert configuration section."
-    )
-
-
 class _generate(BaseModel):
     """Class describing configuration of the 'generate' sub-command."""
 
@@ -621,6 +613,9 @@ class _embedding_model(BaseModel):
 class _rag(BaseModel):
     """Class describing configuration of the 'ilab rag' command."""
 
+    convert: _convert = Field(
+        default_factory=_convert, description="RAG convert configuration section."
+    )
     document_store: _document_store = Field(
         default_factory=_document_store,
         description="Document store configuration for RAG.",
