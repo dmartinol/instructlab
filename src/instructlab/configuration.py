@@ -655,8 +655,6 @@ class Config(BaseModel):
     generate: _generate = Field(
         default_factory=_generate, description="Generate configuration section."
     )
-    # RAG configuration
-    rag: _rag = Field(default_factory=_rag, description="RAG configuration section.")
     # serve configuration (includes both llama-cpp and vLLM configuration)
     serve: _serve = Field(
         default_factory=_serve, description="Serve configuration section."

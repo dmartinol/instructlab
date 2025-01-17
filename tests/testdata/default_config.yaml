@@ -233,12 +233,6 @@ rag:
     # Directory where converted documents are stored.
     # Default: /data/instructlab/converted_documents
     output_dir: /data/instructlab/converted_documents
-    # Branch of taxonomy used to calculate diff against.
-    # Default: origin/main
-    taxonomy_base: origin/main
-    # Directory where taxonomy is stored and accessed from.
-    # Default: /data/instructlab/taxonomy
-    taxonomy_path: /data/instructlab/taxonomy
   # Document store configuration for RAG.
   document_store:
     # Document store collection name.
