@@ -612,14 +612,14 @@ class _embedding_model(BaseModel):
     # model configuration
     model_config = ConfigDict(extra="ignore", protected_namespaces=())
 
-    embedding_model_name: StrictStr = Field(
+    model_name: StrictStr = Field(
         default_factory=lambda: DEFAULTS.DEFAULT_EMBEDDING_MODEL,
         description="Embedding model to use for RAG.",
     )
 
 
-class _ingest(BaseModel):
-    """Class describing configuration of the 'rag ingest' command."""
+class _rag(BaseModel):
+    """Class describing configuration of the 'ilab rag' command."""
 
     document_store: _document_store = Field(
         default_factory=_document_store,
@@ -627,19 +627,7 @@ class _ingest(BaseModel):
     )
     embedding_model: _embedding_model = Field(
         default_factory=_embedding_model,
-        description="Embedding parameters for ingestion.",
-    )
-
-
-class _retriever(BaseModel):
-    """Class describing configuration of retrieval parameters for RAG."""
-
-    top_k: int = Field(
-        default=20, description="The maximum number of documents to retrieve."
-    )
-    embedding_model: _embedding_model = Field(
-        default=_embedding_model(),
-        description="Embedding parameters for retrieval.",
+        description="Embedding model configuration for RAG.",
     )
 
 
@@ -698,10 +686,8 @@ class Config(BaseModel):
     general: _general = Field(
         default_factory=_general, description="General configuration section."
     )
-    # ingest configuration
-    ingest: _ingest = Field(
-        default_factory=_ingest, description="Ingest configuration section."
-    )
+    # RAG configuration
+    rag: _rag = Field(default_factory=_rag, description="RAG configuration section.")
     # model configuration
     model_config = ConfigDict(extra="ignore")
     # config file versioning

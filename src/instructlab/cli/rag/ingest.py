@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
     "uri",
     type=click.STRING,
     cls=clickext.ConfigOption,
+    config_class="rag",
     config_sections="document_store",
 )
 @click.option(
@@ -25,12 +26,15 @@ logger = logging.getLogger(__name__)
     "collection_name",
     type=click.STRING,
     cls=clickext.ConfigOption,
+    config_class="rag",
     config_sections="document_store",
 )
 @click.option(
     "--embedding-model-name",
+    "model_name",
     type=click.STRING,
     cls=clickext.ConfigOption,
+    config_class="rag",
     config_sections="embedding_model",
 )
 @click.option(
@@ -50,12 +54,12 @@ def ingest(
     ctx,
     uri,
     collection_name,
-    embedding_model_name,
+    model_name,
     input_dir,
 ):
     """The embedding ingestion pipeline"""
-    logger.info(f"VectorDB params: {collection_name} @ {uri}")
-    logger.info(f"Embedding model: {embedding_model_name}")
+    logger.debug(f"Document Store: {collection_name} @ {uri}")
+    logger.debug(f"Embedding model: {model_name}")
 
     if input_dir is None:
         output_dir = ctx.obj.config.generate.output_dir
@@ -80,6 +84,6 @@ def ingest(
     ingestor = create_document_store_ingestor(
         document_store_uri=uri,
         document_store_collection_name=collection_name,
-        embedding_model_path=embedding_model_name,
+        embedding_model_path=model_name,
     )
     ingestor.ingest_documents(input_dir=input_dir)
